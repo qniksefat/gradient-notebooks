@@ -12,7 +12,7 @@ Notebook 1 contains the connectivity matrices and shows how we centered them for
 ## 2 Gradients (Large-Scale Manifolds)
 Notebook 2 includes the gradient values and a few visualizations, as well as 3D plots in notebook 2.1.
 
-![grad1](https://github.com/qniksefat/gradient-notebooks/blob/master/g-regions.png?raw=true)
+![grad1](https://github.com/qniksefat/gradient-notebooks/blob/master/large-manifold-nbs/plots/g-regions.png?raw=true)
 
 ## 3 Statistical Analysis
 Notebook 3 contains the statistical analysis of the data.
@@ -20,7 +20,7 @@ Notebook 3 contains the statistical analysis of the data.
 ## 4 Post-hoc Seed Connectivity
 Notebook 4 provides an analysis of post-hoc seed connectivity.
 
-![seed-conn](https://github.com/qniksefat/gradient-notebooks/blob/master/fig4.png?raw=true)
+![seed-conn](https://github.com/qniksefat/gradient-notebooks/blob/master/large-manifold-nbs/plots/fig4.png?raw=true)
 
 
 ## 5 Behaviour (Task Scores)
