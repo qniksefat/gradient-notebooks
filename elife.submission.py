@@ -570,6 +570,68 @@ def scatterplot_graph_ecc(df, num_nets):
     fname = 'supp_fig2_left'; plt.savefig(fname+'.png', dpi=300); plt.savefig(fname+'.svg', format='svg')
 
 
+def scatterplot(df, epoch):
+    plt.figure(figsize=(10, 10))
+    seaborn.regplot(data=df, x=epoch, y='score', color='black')
+    r, p = pearsonr(df[epoch], df['score'])
+    plt.title(f'{epoch} {epoch} r={r:.4f} p={p:.4f}')
+    plt.xlim(-1.4, 1.4)
+    plt.ylim(-2, 2)
+    plt.savefig(f'DAN-A-{epoch}.svg')
+
+
+def generate_spin_permutation_nulls(df, spins, true_ordering, n_perms=2000):
+    def f(ordering):
+        df1 = df.copy()
+        df1['idx_perm'] = 36 * (ordering if isinstance(ordering, list) else ordering.tolist())
+        return df1.merge(REGIONS, left_on='idx_perm', right_on='idx').groupby(['17net_y', 'subject']).mean().groupby('17net_y').corr()['score']
+
+    df_nulls = pd.concat([f(ordering) for ordering in spins.T], axis=0, keys=range(n_perms))
+    return df_nulls
+
+
+def plot_permutation_results(df, df_nulls, true_values, spins, true_ordering):
+    nums_net = '17net'
+
+    fig, axes = plt.subplots(2, REGIONS[nums_net].nunique(), figsize=(REGIONS[nums_net].nunique() * 3, 6), sharex=True, sharey=True)
+
+    for i, epoch in enumerate(['b2e', 'e2l']):
+        for j, net in enumerate(REGIONS[nums_net].unique()):
+            null_values = df_nulls.loc[:, net, epoch].values
+            axes[i, j].hist(null_values, bins=20)
+            axes[i, j].axvline(true_values.loc[net, epoch], color='red')
+            pval = 1 - percentileofscore(null_values, true_values.loc[net, epoch]) / 100
+            axes[i, j].set_title(f'{pval:.3f}')
+            axes[i, j].set_xlabel(net)
+
+    axes[0, 0].set_ylabel('b2e')
+    axes[1, 0].set_ylabel('e2l')
+
+    plt.tight_layout()
+    plt.savefig('DAN-B-vasa.svg', format='svg')
+
+
+def plot_permutation_results_boxplot(df, df_nulls, true_values, true_ordering, nums_net='17net'):
+    fig, axes = plt.subplots(2, REGIONS[nums_net].nunique(), figsize=(REGIONS[nums_net].nunique() * 1.5, 6), sharex=False, sharey=True)
+
+    for i, epoch in enumerate(['b2e', 'e2l']):
+        for j, net in enumerate(sorted(REGIONS[nums_net].unique())):
+            null_values = df_nulls.loc[:, net, epoch].values
+            # instead of histogram, plot a box plot of the null distribution. do not show outliers.
+            # show the true value in red dot (not line) on top of the box plot. not with different x.
+            axes[i, j].boxplot(null_values, showfliers=False)
+            axes[i, j].plot(1, true_values.loc[net, epoch], 'ro')
+            pval = 1 - percentileofscore(null_values, true_values.loc[net, epoch]) / 100
+            axes[i, j].set_title(f'{pval:.3f}')
+            axes[i, j].set_xlabel(net)
+
+    axes[0, 0].set_ylabel('b2e')
+    axes[1, 0].set_ylabel('e2l')
+
+    plt.tight_layout()
+    plt.savefig('DAN-B-vasa.svg', format='svg')
+
+
 if __name__ == '__main__':
     # dump_gradients()
     print('loading gradients and eccentricity')
@@ -646,9 +708,17 @@ if __name__ == '__main__':
     # fig 5 strip plots
     stripplot_ecc(df_gradients.reset_index(), seeds)
     
-    # fig 6
+    # fig 6 from Tianyao
 
+    # fig 7
+    spins = nnstats.gen_spinsamples(coords, hemi, seed=1234, n_rotate=2000, method='vasa')
+    true_ordering = REGIONS.set_index('region').loc[df['region'].unique()]['idx'].values
+    true_values = f(true_ordering).unstack()
+    df_nulls = generate_spin_permutation_nulls(df, spins, true_ordering)
+    plot_permutation_results(df, df_nulls, true_values, spins, true_ordering)
+    plot_permutation_results_boxplot(df, df_nulls, true_values, true_ordering)
 
+    
     # supplementary figures
     
     # supp fig 1. ignore
