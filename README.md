@@ -51,6 +51,17 @@ The notebooks are in `large-manifold-nbs/` and are organized as follows:
 ### Behaviour (Task Scores)
 - **Notebook 5:** Examination of individual differences in performance.
 
+## Neuro Package Dependencies
+
+- nilearn
+- nibabel
+- brainspace
+- surfplot
+- enigmatoolbox
+- bct
+- pyriemann
+- pingouin (version 0.2.1)
+
 ## Project Structure
 
 - **Data Directory:** Contains subdirectories for different data sources and files related to the task.
